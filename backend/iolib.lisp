@@ -294,9 +294,9 @@ Backtrace:
     (unless (eq event-base *event-base*)
       (close event-base))))
 
-(defmethod socket-option ((socket usocket) option)
+(defmethod socket-option ((socket usocket) option &key)
   (iolib/sockets:socket-option (socket-stream socket) option))
 
-(defmethod (setf socket-option) (new-value (socket usocket) option)
+(defmethod (setf socket-option) (new-value (socket usocket) option &key)
   (let ((form `(setf (iolib/sockets:socket-option ,(socket-stream socket) ,option) ,new-value)))
     (eval (macroexpand-1 form))))
