@@ -592,7 +592,7 @@ happen. Use with care."
            (setf ok t))
       ;; Clean up in case of an error.
       (unless ok
-        (sb-bsd-sockets:socket-close socket :abort t)))
+        (sb-bsd-sockets:socket-close socket #-mkcl :abort #-mkcl t)))
     usocket))
 
 (defun socket-listen-internal
