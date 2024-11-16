@@ -84,21 +84,28 @@
                        local-host local-port)
   (declare (ignore element-type deadline nodelay))
   (with-mapped-conditions (nil host)
-    (let* ((remote (when (and host port) (iolib/sockets:ensure-hostname host)))
-	   (local  (when (and local-host local-port)
-		     (iolib/sockets:ensure-hostname local-host)))
+    (let* ((host-local-socket-p (pathnamep host))
+	   (remote (unless host-local-socket-p
+		     (when (and host port) (iolib/sockets:ensure-hostname host))))
+	   (local (unless host-local-socket-p
+		    (when (and local-host local-port)
+		      (iolib/sockets:ensure-hostname local-host))))
 	   (ipv6-p (or (and remote (ipv6-address-p remote)
 		       (and local  (ipv6-address-p local)))))
 	   (socket (apply #'iolib/sockets:make-socket
 			  `(:type ,protocol
-			    :address-family :internet
+			    :address-family ,(if host-local-socket-p :local :internet)
 			    :ipv6 ,ipv6-p
-			    :connect ,(cond ((eq protocol :stream) :active)
+			    :connect ,(cond (host-local-socket-p :active)
+					    ((eq protocol :stream) :active)
 					    ((and host port)       :active)
 					    (t                     :passive))
 			    ,@(when local
 				`(:local-host ,local :local-port ,local-port))
-			    :nodelay nodelay))))
+			    ,@(when host-local-socket-p
+				`(:remote-filename ,(namestring host)))
+			    ,@(unless host-local-socket-p
+				`(:nodelay nodelay))))))
       (when remote
 	(apply #'iolib/sockets:connect
 	       `(,socket ,remote :port ,port ,@(when timeout `(:wait ,timeout))))
