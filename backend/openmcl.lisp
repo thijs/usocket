@@ -113,7 +113,7 @@
 	 (make-stream-socket :stream mcl-sock :socket mcl-sock)))
       (:datagram
        (let* ((mcl-sock
-	       (openmcl-socket:make-socket :address-family :internet
+	       (openmcl-socket:make-socket :address-family (if (pathnamep host) :file :internet)
 					   :type :datagram
 					   :local-host local-host
 					   :local-port local-port
