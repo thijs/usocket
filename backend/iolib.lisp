@@ -294,7 +294,7 @@ Backtrace:
 (defun wait-for-input-internal (wait-list &key timeout)
   (let ((event-base (wait-list-%wait wait-list)))
     (handler-case
-	(iolib/multiplex:event-dispatch event-base :timeout timeout)
+	(iolib/multiplex:event-dispatch event-base :one-shot t :timeout timeout)
       (iolib/streams:hangup ())
       (end-of-file ()))
     ;; close the event-base after use
